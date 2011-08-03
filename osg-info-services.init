@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# osg-info-services This shell script enables the automatic use of osg-info-services
+#
+# Author:       Brian Bockelman <bbockelm@cse.unl.edu>
+#
+# chkconfig:	- 51 01
+#
+# description:  Enable uploading of GIP results to OSG information services.
+#               Based upon a similar script written by Neha Sharma for edg-mkgridmap
+#               I believe the edg-mkgridmap script was adopted from fetch-crl 2.8
+# processname:  osg-info-services
+#
+
+# source function library
+. /etc/rc.d/init.d/functions
+lockfile=/var/lock/subsys/osg-info-services
+
+RETVAL=0
+
+start() {
+	action $"Enabling periodic osg-info-services: " touch "$lockfile" 
+	RETVAL=$?
+}
+
+stop() {
+	action $"Disabling periodic osg-info-services: " rm -f "$lockfile" 
+	RETVAL=$?
+}
+
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+	start
+	;;
+  stop) 
+	stop
+	;;
+  restart|force-reload)
+	restart
+	;;
+  reload)
+	;;
+  condrestart)
+	[ -f "$lockfile" ] && restart
+	;;
+  status)
+	if [ -f $lockfile ]; then
+		echo $"Periodic osg-info-services is enabled."
+		RETVAL=
+	else
+		echo $"Periodic osg-info-services is disabled."
+		RETVAL=3
+	fi
+	;;
+  *)
+	echo $"Usage: $0 {start|stop|status|restart|reload|force-reload|condrestart}"
+	exit 1
+esac
+
+exit $RETVAL
