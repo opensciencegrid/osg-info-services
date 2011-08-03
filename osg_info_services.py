@@ -17,13 +17,15 @@ import ConfigParser
 
 from xml.sax.saxutils import XMLGenerator
 
-sys.path.append(os.path.expandvars("$GIP_LOCATION/lib/python"))
+if 'GIP_LOCATION' in os.environ:
+    sys.path.append(os.path.expandvars("$GIP_LOCATION/lib/python"))
+else:
+    sys.path.append("/usr/libexec/gip")
 import osg_info_wrapper
 import gip_common
 import gip_ldap
-from gip_logging import getLogger
  
-log = getLogger('CEMonUploader')
+log = gip_common.getLogger('CEMonUploader')
 
 DEBUG = False
 
