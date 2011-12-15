@@ -29,6 +29,8 @@ log = gip_common.getLogger('CEMonUploader')
 
 DEBUG = False
 
+DEFAULT_CERT = '/etc/grid-security/http/httpcert.pem'
+DEFAULT_KEY = '/etc/grid-security/http/httpkey.pem'
 
 # Sadly, this had to be copy/pasted from gip_common because
 # of a slight incompatible fqan normalization.
@@ -77,10 +79,8 @@ class HTTPSHandler2(urllib2.HTTPSHandler):
 
     def __init__(self, *cert, **kw):
         
-        ext_key = kw.setdefault('key_file',
-            '/etc/grid-security/containerkey.pem')
-        ext_cert = kw.setdefault('certificate_file',
-            '/etc/grid-security/containercert.pem')
+        ext_key = kw.setdefault('key_file', DEFAULT_KEY)
+        ext_cert = kw.setdefault('certificate_file', DEFAULT_CERT)
 
         class HTTPSConnection2(httplib.HTTPSConnection):
 
@@ -722,10 +722,14 @@ def configure_emitter():
         cae.add_emitter(ClassAdPrinter())
 
     kw = {}
+    cert = DEFAULT_CERT
+    key = DEFAULT_KEY
     if options.key:
         kw['key_file'] = options.key
+        key = options.key
     if options.certificate:
         kw['certificate_file'] = options.certificate
+        cert = DEFAULT_CERT
 
     if not options.ress:
         options.ress = []
@@ -753,11 +757,31 @@ def configure_emitter():
         log.info("No BDII endpoints configured.")
         bdii = None
     
-    return cae, bdii, options.uri, options.dryrun, options.timeout, cp
+    return cae, bdii, options.uri, options.dryrun, options.timeout, cert, \
+        key, cp
+
+def test_permissions(cert, key):
+    # Before uploading, try to read out the certificate;
+    # fail cleanly if it's unreadable.
+    try:
+        fd = open(key, "r")
+        fd.close()
+    except IOError, oe:
+        log.error("Unable to open %s: %s" % (key, oe.strerror))
+        return False
+            
+    try:
+        fd = open(cert, "r")
+        fd.close()
+    except IOError, oe:
+        log.error("Unable to open %s: %s" % (cert, oe.strerror))
+        return False
+
+    return True
 
 
 def main():
-    cae, bdii, uri, dryrun, timeout, cp = configure_emitter()
+    cae, bdii, uri, dryrun, timeout, cert, key, cp = configure_emitter()
     if not uri:
         t1 = -time.time()
         entries = osg_info_wrapper.main(cp=cp, return_entries=True)
@@ -771,8 +795,14 @@ def main():
     else:
         fd = urllib2.urlopen(uri)
         entries = gip_ldap.read_ldap(fd, multi=True)
-    upload(cae, bdii, entries, dryrun=dryrun)
 
+    # We couldn't check permissions before because osg_info_wrapper invoke
+    # setreuid/setregid.
+    if not test_permissions(cert, key):
+        return 1
+
+    upload(cae, bdii, entries, dryrun=dryrun)
+    return 0
 
 def upload(cae, bdii, entries, dryrun=False):
     """
@@ -969,5 +999,5 @@ def upload(cae, bdii, entries, dryrun=False):
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
 
