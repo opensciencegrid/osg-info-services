@@ -2,8 +2,10 @@
 
 import os
 import re
+import pwd
 import sys
 import sets
+import stat
 import time
 import types
 import signal
@@ -21,6 +23,43 @@ if 'GIP_LOCATION' in os.environ:
     sys.path.append(os.path.expandvars("$GIP_LOCATION/lib/python"))
 else:
     sys.path.append("/usr/libexec/gip")
+
+def dir_can_read_write(path, uid, gid):
+    """
+    A rather unsatisfactory test for access.
+    Only useful with the below fix_ownership; designed to make sure that
+    function doesn't trigger all the time; actually, likely too restrictive
+    in the presence of ACLs.  A better approach would be to do seteuid/gid.
+    """
+    st = os.stat(path)
+    if st.st_uid == uid:
+        return True 
+    if st.st_gid == gid and ((st.st_mode | stat.S_IRWXG) == stat.S_IRWXG):
+        return True
+    return False
+
+def fix_ownership():
+    """
+    A hack to fix directory ownership permissions.
+    """
+    from gip_common import config, gipDir, cp_get
+    cp = config()
+    gip_user = cp_get(cp, "gip", "gip_user", "tomcat")
+    user_info = pwd.getpwnam(gip_user)
+    gip_uid = user_info.pw_uid
+    gip_gid = user_info.pw_gid
+    
+    logdir = gipDir(os.path.expandvars('$GIP_LOCATION/var/logs'),
+        '/var/log/gip')
+    if not dir_can_read_write(logdir, gip_uid, gip_gid):
+        os.chown(logdir, gip_uid, gip_gid)
+    
+    temp_dir = os.path.expandvars(cp_get(cp, "gip", "temp_dir", \
+        gipDir("$GIP_LOCATION/var/tmp", '/var/cache/gip')))
+    if not dir_can_read_write(temp_dir, gip_uid, gip_gid):
+        os.chown(temp_dir, gip_uid, gip_gid)
+
+fix_directories()
 import osg_info_wrapper
 import gip_common
 import gip_ldap
