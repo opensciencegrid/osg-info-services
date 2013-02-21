@@ -123,8 +123,8 @@ class HTTPSHandler2(urllib2.HTTPSHandler):
 
         class HTTPSConnection2(httplib.HTTPSConnection):
 
-            def __init__(self, host):
-                httplib.HTTPSConnection.__init__(self, host)
+            def __init__(self, host, **kw):
+                httplib.HTTPSConnection.__init__(self, host, **kw)
                 self.key_file = ext_key 
                 self.cert_file = ext_cert
         self.conn_class = HTTPSConnection2
