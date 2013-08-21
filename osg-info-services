@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
+
 import os
 import re
 import pwd
@@ -59,7 +62,7 @@ def fix_ownership():
     if not dir_can_read_write(temp_dir, gip_uid, gip_gid):
         os.chown(temp_dir, gip_uid, gip_gid)
 
-fix_directories()
+fix_ownership()
 import osg_info_wrapper
 import gip_common
 import gip_ldap
