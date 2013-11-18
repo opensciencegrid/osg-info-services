@@ -393,6 +393,15 @@ class CEMonMessageProducer(ClassAdSink):
             opener = urllib2.build_opener(auth_handler)
             output = opener.open(req).read()
             # print output
+        except urllib2.HTTPError, e:
+            msg = "Could not upload to %s: %s" % (endpoint, str(e))
+            log.error(msg)
+        except urllib2.URLError, e:
+            if hasattr(e, 'reason'):
+                msg = "Could not upload to %s: %s" % (endpoint, str(e.reason))
+            else:
+                msg = "Could not upload to %s: %s" % (endpoint, str(e))
+            log.error(msg)
         except Exception, e:
             msg = "\nException occured for endpoint: %s \n\n%s" % (endpoint, str(e))
             log.exception(msg)
