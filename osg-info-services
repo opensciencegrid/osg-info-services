@@ -247,7 +247,7 @@ class ClassAdPrinter(ClassAdSink):
 
 class CEMonMessageProducer(ClassAdSink):
 
-    def __init__(self, hosts, certificate_file=None, key_file=None):
+    def __init__(self, hosts, certificate_file=None, key_file=None, consumer_url=None):
         super(CEMonMessageProducer, self).__init__()
         self.certificate = certificate_file
         self.key = key_file
@@ -261,6 +261,9 @@ class CEMonMessageProducer(ClassAdSink):
                 if len(host.split(':')) != 2:
                     host = '%s:14001' % host
                 self.endpoints.append('http://%s%s' % (host, self.default_url))
+        if not consumer_url:
+            consumer_url = 'https://osg-ress-4.fnal.gov:8443/ig/services/CEInfoCollector'
+        self.consumer_url = consumer_url
 
     def generate(self, messages, producer="OSG CE Sensor"):
         self.encoding = 'UTF-8'
@@ -281,8 +284,7 @@ class CEMonMessageProducer(ClassAdSink):
         gen.startPrefixMapping('glite', 'http://glite.org/ce/monitorapij/types')
         gen.startElementNS(('http://glite.org/ce/monitorapij/types',
             'Notification'), 'Notification', {("http://glite.org/ce/" \
-            "monitorapij/types", 'ConsumerURL'): \
-            'https://osg-ress-4.fnal.gov:8443/ig/services/CEInfoCollector'})
+            "monitorapij/types", 'ConsumerURL'): self.consumer_url})
         gen.characters('\n    ')
         gen.startElementNS(('http://glite.org/ce/monitorapij/types',
             'ExpirationTime'), 'ExpirationTime', {})
@@ -738,6 +740,7 @@ def configure_emitter():
         help="Force the script to die after a certain period")
     parser.add_option("--use_cache", dest="cache", default=False,
         action="store_true", help="Use the GIP's built-in caching mechanism")
+    parser.add_option("--consumer-url", dest="consumer_url", default=None)
     options, args = parser.parse_args()
     sys.argv = []
     if not options.config:
@@ -787,6 +790,8 @@ def configure_emitter():
     if options.certificate:
         kw['certificate_file'] = options.certificate
         cert = DEFAULT_CERT
+    if options.consumer_url:
+        kw['consumer_url'] = options.consumer_url
 
     if not options.ress:
         options.ress = []
