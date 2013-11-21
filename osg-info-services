@@ -46,6 +46,7 @@ def fix_ownership():
     A hack to fix directory ownership permissions.
     """
     from gip_common import config, gipDir, cp_get
+    import logging
     cp = config()
     gip_user = cp_get(cp, "gip", "gip_user", "tomcat")
     user_info = pwd.getpwnam(gip_user)
@@ -56,6 +57,21 @@ def fix_ownership():
         '/var/log/gip')
     if not dir_can_read_write(logdir, gip_uid, gip_gid):
         os.chown(logdir, gip_uid, gip_gid)
+
+    # Merely importing gip_common will cause the gip log file to get created
+    # with the privs of the current user (root). I need to fix the ownership
+    # because we will drop privs later. (We can't drop privs now because we
+    # need gip_common to determine what user to drop privs _to_).
+    # So I grope around in the root logger object to get the path to the
+    # logfile.
+    # This is a hack.
+    log = logging.getLogger()
+    try:
+        for handler in log.handlers:
+            if hasattr(handler, 'baseFilename'):
+                os.chown(handler.baseFilename, gip_uid, gip_gid)
+    except Exception, e:
+        log.info(str(e))
     
     temp_dir = os.path.expandvars(cp_get(cp, "gip", "temp_dir", \
         gipDir("$GIP_LOCATION/var/tmp", '/var/cache/gip')))
