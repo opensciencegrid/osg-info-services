@@ -83,7 +83,13 @@ def fix_ownership():
 # sys.argv and restore it.
 save_argv = sys.argv
 sys.argv = []
-fix_ownership()
+try:
+    fix_ownership()
+except ValueError, err:
+    if err.message.find("unconfigured OSG install") >= 0:
+        print >> sys.stderr, "%s\nYou can generate a valid User-VO map with either gums-host-cron or edg-mkgridmap" % err.message
+        sys.exit(1)
+    raise
 import osg_info_wrapper
 sys.argv = save_argv
 import gip_common
