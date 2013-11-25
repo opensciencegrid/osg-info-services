@@ -86,8 +86,9 @@ sys.argv = []
 try:
     fix_ownership()
 except ValueError, err:
-    if err.message.find("unconfigured OSG install") >= 0:
-        print >> sys.stderr, "%s\nYou can generate a valid User-VO map with either gums-host-cron or edg-mkgridmap" % err.message
+    # Can't use err.message because that doesn't work in py2.4
+    if err.args[0] and err.args[0].find("unconfigured OSG install") >= 0:
+        print >> sys.stderr, "%s\nYou can generate a valid User-VO map with either gums-host-cron or edg-mkgridmap" % err.args[0]
         sys.exit(1)
     raise
 import osg_info_wrapper
