@@ -49,10 +49,15 @@ def fix_ownership():
     import logging
     cp = config()
     gip_user = cp_get(cp, "gip", "gip_user", "tomcat")
-    user_info = pwd.getpwnam(gip_user)
-    gip_uid = user_info.pw_uid
-    gip_gid = user_info.pw_gid
-    
+    try:
+        user_info = pwd.getpwnam(gip_user)
+        gip_uid = user_info.pw_uid
+        gip_gid = user_info.pw_gid
+    except KeyError:
+        sys.stderr.write("Invalid gip user configured ('%s')\n" % gip_user)
+        # We can't fix ownership if the owner we want doesn't exist
+        return
+
     logdir = gipDir(os.path.expandvars('$GIP_LOCATION/var/logs'),
         '/var/log/gip')
     if not dir_can_read_write(logdir, gip_uid, gip_gid):
