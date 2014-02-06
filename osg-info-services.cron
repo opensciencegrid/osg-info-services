@@ -1,11 +1,10 @@
-# Cron job running by default every 6 hours.
+# Cron job
 # The lock file can be enabled or disabled via a
 # service osg-info-services start
-# chkconfig osg-ifo-services on
+# chkconfig osg-info-services on
 
-# Note the lock file not existing is success hence the the slightly odd logic
-# below.
-# run every 10 minutes but sleep randomly for up to 5 minutes.
+# Note the lock file not existing is success (we don't want the cron job to
+# return nonzero if the lock file is gone), hence the double negative below.
 
-*/10 * * * * root [ ! -f /var/lock/subsys/osg-info-services ] || /bin/sh -c 'perl -e "sleep rand 300" && /usr/sbin/osg-info-services'
-
+# Run every 10 +/- 5 minutes
+*/10 * * * * root [ ! -f /var/lock/subsys/osg-info-services ] || /bin/sh -c 'perl -e "sleep rand 300" && /usr/sbin/osg-info-services >/dev/null 2>&1'
