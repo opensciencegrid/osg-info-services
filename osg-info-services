@@ -48,7 +48,7 @@ def fix_ownership():
     from gip_common import config, gipDir, cp_get
     import logging
     cp = config()
-    gip_user = cp_get(cp, "gip", "gip_user", "gip")
+    gip_user = cp_get(cp, "gip", "gip_user", "tomcat")
     try:
         user_info = pwd.getpwnam(gip_user)
         gip_uid = user_info.pw_uid
