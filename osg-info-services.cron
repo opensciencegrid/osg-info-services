@@ -7,4 +7,4 @@
 # return nonzero if the lock file is gone), hence the double negative below.
 
 # Run every 10 +/- 5 minutes
-*/10 * * * * root [ ! -f /var/lock/subsys/osg-info-services ] || /bin/sh -c 'perl -e "sleep rand 300" && /usr/sbin/osg-info-services >/dev/null 2>&1'
+*/10 * * * * root [ ! -f /var/lock/subsys/osg-info-services ] || /bin/sh -c 'perl -e "sleep rand 300" && http_proxy= /usr/sbin/osg-info-services >/dev/null 2>&1'
