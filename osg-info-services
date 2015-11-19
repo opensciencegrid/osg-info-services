@@ -713,12 +713,9 @@ def configure_emitter():
     parser.add_option("-g", "--ignore_config", action="store_false",
         dest="config", help="Do not use the settings in the OSG config files.",
         default=True)
-    parser.add_option("-b", "--bdii", dest="bdii", help="BDII servers to send" \
-        " this data to.", action="append")
-    parser.add_option("-r", "--ress", dest="ress", help="ReSS servers to send" \
-        " this data to.", action="append")
-    parser.add_option("-c", "--certificate", dest="certificate", help="Cert" \
-        "ificate file to use.", default=None)
+    parser.add_option("-b", "--bdii", dest="bdii", help="BDII servers to send this data to.", action="append")
+    parser.add_option("-r", "--ress", dest="ress", help="[disabled]", action="append")
+    parser.add_option("-c", "--certificate", dest="certificate", help="Certificate file to use.", default=None)
     parser.add_option("-i", "--uri", dest="uri", help="URI for input data.",
         default=None)
     parser.add_option("-k", "--keyfile", dest="key", help="Key file to use.",
@@ -784,24 +781,16 @@ def configure_emitter():
     if options.consumer_url:
         kw['consumer_url'] = options.consumer_url
 
-    if not options.ress:
-        options.ress = []
     if not options.bdii:
         options.bdii = []
 
     if options.config:
         bdii_endpoints = gip_common.cp_get(cp, "gip", "bdii_endpoints", "")
-        ress_endpoints = gip_common.cp_get(cp, "gip", "ress_endpoints", "")
-        for endpoint in split_re.split(ress_endpoints):
-            options.ress.append(endpoint)
         for endpoint in split_re.split(bdii_endpoints):
             options.bdii.append(endpoint)
 
     if options.ress:
-        log.info("ReSS endpoints: %s" % ", ".join(options.ress))
-        cae.add_emitter(ClassAdSender(options.ress, **kw))
-    else:
-        log.info("No ReSS endpoints configured.")
+        log.info("ReSS has been shut down and support for it has been removed from osg-info-services.")
 
     if options.bdii:
         log.info("BDII endpoints: %s" % ", ".join(options.bdii))
