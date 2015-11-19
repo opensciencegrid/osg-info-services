@@ -36,7 +36,7 @@ def dir_can_read_write(path, uid, gid):
     """
     st = os.stat(path)
     if st.st_uid == uid:
-        return True 
+        return True
     if st.st_gid == gid and ((st.st_mode | stat.S_IRWXG) == stat.S_IRWXG):
         return True
     return False
@@ -77,7 +77,7 @@ def fix_ownership():
                 os.chown(handler.baseFilename, gip_uid, gip_gid)
     except Exception, e:
         log.info(str(e))
-    
+
     temp_dir = os.path.expandvars(cp_get(cp, "gip", "temp_dir", \
         gipDir("$GIP_LOCATION/var/tmp", '/var/cache/gip')))
     if not dir_can_read_write(temp_dir, gip_uid, gip_gid):
@@ -100,7 +100,7 @@ import osg_info_wrapper
 sys.argv = save_argv
 import gip_common
 import gip_ldap
- 
+
 log = gip_common.getLogger('CEMonUploader')
 
 DEBUG = False
@@ -125,7 +125,7 @@ def matchFQAN_services(fqan1, fqan2):
        - <VO>
 
     @param fqan1: The FQAN we are testing for match
-    @param fqan2: The FQAN 
+    @param fqan2: The FQAN
     """
     fqan1 = gip_common.normalizeFQAN(fqan1)
     fqan2 = gip_common.normalizeFQAN(fqan2)
@@ -154,7 +154,7 @@ def matchFQAN(acbr1, acbr2):
 class HTTPSHandler2(urllib2.HTTPSHandler):
 
     def __init__(self, *cert, **kw):
-        
+
         ext_key = kw.setdefault('key_file', DEFAULT_KEY)
         ext_cert = kw.setdefault('certificate_file', DEFAULT_CERT)
 
@@ -168,7 +168,7 @@ class HTTPSHandler2(urllib2.HTTPSHandler):
         del kw['key_file']
         del kw['certificate_file']
         urllib2.HTTPSHandler.__init__(self, *cert, **kw)
- 
+
     def https_open(self, req):
         return self.do_open(self.conn_class, req)
 
@@ -268,7 +268,7 @@ class ClassAdPrinter(ClassAdSink):
                 continue
             if isinstance(val, types.IntType):
                 output.append('%s = %i;' % (key, val))
-            else:       
+            else:
                 output.append('%s = "%s";' % (key, str(val)))
         print "\n".join(output) + "\n"
 
@@ -298,93 +298,65 @@ class CEMonMessageProducer(ClassAdSink):
         output = cStringIO.StringIO()
         gen = XMLGenerator(output, self.encoding)
         gen.startDocument()
-        gen.startPrefixMapping('soapenv',
-            'http://schemas.xmlsoap.org/soap/envelope/')
-        gen.startElementNS(('http://schemas.xmlsoap.org/soap/envelope/',
-            'Envelope'), 'Envelope', {})
+        gen.startPrefixMapping('soapenv', 'http://schemas.xmlsoap.org/soap/envelope/')
+        gen.startElementNS(('http://schemas.xmlsoap.org/soap/envelope/', 'Envelope'), 'Envelope', {})
         gen.characters('\n ')
-        gen.startElementNS(('http://schemas.xmlsoap.org/soap/envelope/',
-            'Body'), 'Body', {})
+        gen.startElementNS(('http://schemas.xmlsoap.org/soap/envelope/', 'Body'), 'Body', {})
         gen.characters('\n  ')
-        gen.startElement('Notify', {'xmlns': \
-            'http://glite.org/ce/monitorapij/ws'})
+        gen.startElement('Notify', {'xmlns': 'http://glite.org/ce/monitorapij/ws'})
         gen.characters('\n   ')
         gen.startPrefixMapping('glite', 'http://glite.org/ce/monitorapij/types')
-        gen.startElementNS(('http://glite.org/ce/monitorapij/types',
-            'Notification'), 'Notification', {("http://glite.org/ce/" \
-            "monitorapij/types", 'ConsumerURL'): self.consumer_url})
+        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Notification'), 'Notification',
+                           {("http://glite.org/ce/monitorapij/types", 'ConsumerURL'): self.consumer_url})
         gen.characters('\n    ')
-        gen.startElementNS(('http://glite.org/ce/monitorapij/types',
-            'ExpirationTime'), 'ExpirationTime', {})
-        gen.characters((datetime.datetime.now() + datetime.timedelta(7, 0)).\
-            strftime('%Y-%m-%dT%H:%M:%SZ'))
-        gen.endElementNS(('http://glite.org/ce/monitorapij/types',
-            'ExpirationTime'), 'ExpirationTime')
+        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'ExpirationTime'), 'ExpirationTime', {})
+        gen.characters((datetime.datetime.now() + datetime.timedelta(7, 0)).strftime('%Y-%m-%dT%H:%M:%SZ'))
+        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'ExpirationTime'), 'ExpirationTime')
         gen.characters('\n    ')
-        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Topic'),
-            'Topic', {})
+        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Topic'), 'Topic', {})
         gen.characters('\n     ')
-        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Name'),
-            'Name', {})
+        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Name'), 'Name', {})
         gen.characters('OSG_CE')
-        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Name'),
-            'Name')
+        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Name'), 'Name')
         gen.characters('\n     ')
-        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Dialect'),
-            'Dialect', {})
-        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Name'),
-            'Name', {})
+        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Dialect'), 'Dialect', {})
+        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Name'), 'Name', {})
         gen.characters('OLD_CLASSAD')
-        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Name'),
-            'Name')
-        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Dialect'),
-            'Dialect')
+        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Name'), 'Name')
+        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Dialect'), 'Dialect')
         gen.characters('\n    ')
-        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Topic'),
-            'Topic')
+        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Topic'), 'Topic')
         gen.characters('\n    ')
-        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Event'),
-            'Event', {})
+        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Event'), 'Event', {})
         gen.characters('\n    ')
-        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'ID'),
-            'ID', {})
+        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'ID'), 'ID', {})
         gen.characters('-1')
         gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'ID'), 'ID')
         gen.characters('\n     ')
-        gen.startElementNS(('http://glite.org/ce/monitorapij/types',
-            'Timestamp'), 'Timestamp', {})
+        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Timestamp'), 'Timestamp', {})
         gen.characters(datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'))
-        gen.endElementNS(('http://glite.org/ce/monitorapij/types',
-            'Timestamp'), 'Timestamp')
+        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Timestamp'), 'Timestamp')
         gen.characters('\n    ')
-        
+
         for ad in messages:
-            gen.startElementNS(('http://glite.org/ce/monitorapij/types',
-                'Message'), 'Message', {})
+            gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Message'), 'Message', {})
             gen.characters(ad)
-            gen.endElementNS(('http://glite.org/ce/monitorapij/types',
-                'Message'), 'Message')
+            gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Message'), 'Message')
         gen.characters('\n     ')
-        gen.startElementNS(('http://glite.org/ce/monitorapij/types',
-        'Producer'), 'Producer', {})
+        gen.startElementNS(('http://glite.org/ce/monitorapij/types', 'Producer'), 'Producer', {})
         gen.characters(producer)
-        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Producer'),
-            'Producer')
+        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Producer'), 'Producer')
         gen.characters('\n    ')
-        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Event'),
-            'Event')
+        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Event'), 'Event')
         gen.characters('\n   ')
-        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 
-            'Notification'), 'Notification')
+        gen.endElementNS(('http://glite.org/ce/monitorapij/types', 'Notification'), 'Notification')
         gen.characters('\n  ')
         gen.endPrefixMapping('glite')
         gen.endElement('Notify')
         gen.characters('\n ')
-        gen.endElementNS(('http://schemas.xmlsoap.org/soap/envelope/', 
-            'Body'), 'Body')
+        gen.endElementNS(('http://schemas.xmlsoap.org/soap/envelope/', 'Body'), 'Body')
         gen.characters('\n')
-        gen.endElementNS(('http://schemas.xmlsoap.org/soap/envelope/',
-            'Envelope'), 'Envelope')
+        gen.endElementNS(('http://schemas.xmlsoap.org/soap/envelope/', 'Envelope'), 'Envelope')
         gen.endPrefixMapping('soapenv')
         gen.endDocument()
         results = output.getvalue()
@@ -407,12 +379,10 @@ class CEMonMessageProducer(ClassAdSink):
     def _thread_target(self, endpoint):
         try:
             req = urllib2.Request(endpoint, self.encoded_output)
-            req.add_header("SOAPAction", 
-                '"http://glite.org/ce/monitorapij/ws/Notify"')
+            req.add_header("SOAPAction", '"http://glite.org/ce/monitorapij/ws/Notify"')
             req.add_header("Cache-Control", "no-cache")
             req.add_header("Pragma", "no-cache")
-            req.add_header("Accept", "application/soap+xml, " \
-                "application/dime, multipart/related, text/*")
+            req.add_header("Accept", "application/soap+xml, application/dime, multipart/related, text/*")
             log.info("Uploading output to %s" % endpoint)
             kw = {}
             if self.certificate:
@@ -468,7 +438,7 @@ class ClassAdSender(CEMonMessageProducer):
 
     def run(self):
         messages = []
-        
+
         for ad in self.ads:
             out = []
             keys = ad.keys()
@@ -485,8 +455,7 @@ class ClassAdSender(CEMonMessageProducer):
                     out.append('%s = "%s";' % (key, str(val)))
             message = "[\n" + "\n        ".join(out) + "\n\n]"
             messages.append(message)
-        log.info("Generated %i ClassAds for endpoints %s" % (len(self.ads),
-            ", ".join(self.endpoints)))
+        log.info("Generated %i ClassAds for endpoints %s" % (len(self.ads), ", ".join(self.endpoints)))
         output = self.generate(messages)
         self.encoded_output = output
         super(ClassAdSender, self).run()
@@ -554,8 +523,7 @@ class ClassAdEmitter(object):
             return self._match_view_cache[t]
         if self.can_access(voview_acbr, sa, "SAAccessControlBaseRule"):
             if voinfo:
-                if self.can_access(voview_acbr, voinfo,
-                        "VOInfoAccessControlBaseRule"):
+                if self.can_access(voview_acbr, voinfo, "VOInfoAccessControlBaseRule"):
                     self._match_view_cache[t] = True
                 else:
                     self._match_view_cache[t] = False
@@ -604,8 +572,7 @@ class ClassAdEmitter(object):
             # Use case: CE ACBR has VO:cms and VOMS:/cms/Role=t1access, while
             # there only exists a VOView for VO:cms
             for ce_acbr in ce.glue['CEAccessControlBaseRule']:
-                if self.can_access([ce_acbr], voview, 
-                        "CEAccessControlBaseRule"):
+                if self.can_access([ce_acbr], voview, "CEAccessControlBaseRule"):
                     if ce_acbr not in voview_acbr:
                         secondary_ce_acbrs.append(ce_acbr)
         if service:
@@ -619,8 +586,7 @@ class ClassAdEmitter(object):
         if subcluster:
             self.add_to_results(subcluster, results)
 
-        if DEBUG and (subcluster.glue["SubClusterUniqueID"][0] != \
-                "fnpcosg1.fnal.gov-FNAL_FERMIGRID"):
+        if DEBUG and (subcluster.glue["SubClusterUniqueID"][0] != "fnpcosg1.fnal.gov-FNAL_FERMIGRID"):
             return
 
         # If there are secondary ACBRs for this ClassAd, add them now.
@@ -629,8 +595,7 @@ class ClassAdEmitter(object):
             prev_results = []
             if key in results:
                 prev_results = results[key].split(",")
-            results[key] = ','.join(prev_results + [str(i) for i in \
-                secondary_ce_acbrs])
+            results[key] = ','.join(prev_results + [str(i) for i in secondary_ce_acbrs])
 
         # Separate functions handle software and APs
         if aps:
@@ -650,8 +615,7 @@ class ClassAdEmitter(object):
             for subcluster in subclusters:
                 if voviews:
                     for voview in voviews:
-                        self.emit(ce=ce, voview=voview, subcluster=subcluster,
-                            **kw)
+                        self.emit(ce=ce, voview=voview, subcluster=subcluster, **kw)
                 else:
                     self.emit(ce=ce, subcluster=subcluster, **kw)
         else:
@@ -691,8 +655,7 @@ class ClassAdEmitter(object):
                 kw['service'], kw['cp'] = service
                 # For CEMon compatibility, do not advertise SRMv2.
                 if service[0].glue.get("ServiceType", ["Unknown"])[0] == "SRM" \
-                        and service[0].glue.get("ServiceVersion", [""])[0] \
-                        .find("1") >= 0:
+                        and service[0].glue.get("ServiceVersion", [""])[0].find("1") >= 0:
                     continue
                 if aps:
                     for ap_type in aps.values():
@@ -846,7 +809,7 @@ def configure_emitter():
     else:
         log.info("No BDII endpoints configured.")
         bdii = None
-    
+
     return cae, bdii, options.uri, options.dryrun, options.timeout, cert, \
         key, cp
 
@@ -859,7 +822,7 @@ def test_permissions(cert, key):
     except IOError, oe:
         log.error("Unable to open %s: %s" % (key, oe.strerror))
         return False
-            
+
     try:
         fd = open(cert, "r")
         fd.close()
@@ -984,12 +947,10 @@ def upload(cae, bdii, entries, dryrun=False):
     ce_to_voviews = map_to_list(all_ces, all_voviews, "CEUniqueID")
 
     # Map Cluster to Subclusters
-    cluster_to_subclusters = map_to_list(all_clusters, all_subclusters,
-        "ClusterUniqueID")
+    cluster_to_subclusters = map_to_list(all_clusters, all_subclusters, "ClusterUniqueID")
 
     for ce in all_ces:
-        if DEBUG and (ce.glue['CEUniqueID'][0] != \
-                "fnpcosg1.fnal.gov:2119/jobmanager-condor-default"):
+        if DEBUG and (ce.glue['CEUniqueID'][0] != "fnpcosg1.fnal.gov:2119/jobmanager-condor-default"):
             continue
 
         log.info("Creating ClassAds related to CE %s" % ce.glue['CEUniqueID'])
@@ -998,8 +959,7 @@ def upload(cae, bdii, entries, dryrun=False):
             cluster = join_FK(ce, all_clusters, "ClusterUniqueID")
             site = join_FK(cluster, all_sites, "SiteUniqueID")
         except:
-            print >> sys.stderr, "Unable to find cluster/site for CE;" \
-                " skipping\n%s" % ce.to_ldif()
+            print >> sys.stderr, "Unable to find cluster/site for CE; skipping\n%s" % ce.to_ldif()
             continue
 
         # Adjacent subclusters
@@ -1043,12 +1003,10 @@ def upload(cae, bdii, entries, dryrun=False):
                 # All SAs
                 if adjacent_sas:
                     for sa in adjacent_sas:
-                        if DEBUG and (sa.glue["SALocalID"][0] != \
-                                "readPools:custodial:nearline"):
+                        if DEBUG and (sa.glue["SALocalID"][0] != "readPools:custodial:nearline"):
                             continue
 
-                        log.info("\t\tSA adjacent to SE: %s" % \
-                            sa.glue['SALocalID'])
+                        log.info("\t\tSA adjacent to SE: %s" % sa.glue['SALocalID'])
                         kw['sa'] = sa
                         voinfos = sesa_to_voinfos.get((id_to_se[se], sa), [])
 
@@ -1059,9 +1017,7 @@ def upload(cae, bdii, entries, dryrun=False):
                             for voinfo in voinfos:
                                 kw['voinfo'] = voinfo
                                 my_voviews = cae.filter_voviews(ce, voviews, sa, voinfo)
-                                if DEBUG and (voinfo.glue[\
-                                        'VOInfoAccessControlBaseRule'][0] != \
-                                        'atlas'):
+                                if DEBUG and (voinfo.glue['VOInfoAccessControlBaseRule'][0] != 'atlas'):
                                     continue
                                 if my_voviews:
                                     cae.emit_se(subclusters, ce, my_voviews, **kw)
