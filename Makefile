@@ -4,7 +4,7 @@ VERSION=1.2.0
 MAIN_SCRIPT=$(NAME)
 CRON_JOB=$(NAME).cron
 INIT_SCRIPT=$(NAME).init
-HELPER_SCRIPT=run-with-timeout.py
+HELPER_SCRIPT=run-with-timeout
 
 SBIN_DIR=/usr/sbin
 CRON_DIR=/etc/cron.d

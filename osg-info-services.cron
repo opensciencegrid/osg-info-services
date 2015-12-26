@@ -9,4 +9,4 @@
 # Run every 10 +/- 5 minutes
 # Send soft kill after 3 minutes
 # Send hard kill 1.5 minutes after that
-*/10 * * * * root [ ! -f /var/lock/subsys/osg-info-services ] || /bin/sh -c 'perl -e "sleep rand 300" && http_proxy= /usr/libexec/osg-info-services/run-with-timeout.py 180:90 /usr/sbin/osg-info-services >/dev/null 2>&1'
+*/10 * * * * root [ ! -f /var/lock/subsys/osg-info-services ] || /bin/sh -c 'perl -e "sleep rand 300" && http_proxy= /usr/libexec/osg-info-services/run-with-timeout 180:90 /usr/sbin/osg-info-services >/dev/null 2>&1'
