@@ -3,10 +3,9 @@
 # service osg-info-services start
 # chkconfig osg-info-services on
 
-# Note the lock file not existing is success (we don't want the cron job to
-# return nonzero if the lock file is gone), hence the double negative below.
+http_proxy=""
 
-# Run every 10 +/- 5 minutes
-# Send soft kill after 3 minutes
-# Send hard kill 1.5 minutes after that
-*/10 * * * * root [ ! -f /var/lock/subsys/osg-info-services ] || /bin/sh -c 'perl -e "sleep rand 300" && http_proxy= /usr/libexec/osg-info-services/run-with-timeout 180:90 /usr/sbin/osg-info-services >/dev/null 2>&1'
+# Run every 10 minutes +/- 5 minutes (300 sec)
+# Send soft kill after 3 minutes (180 sec)
+# Send hard kill 1.5 minutes after that (90 sec)
+*/10 * * * * root /usr/libexec/osg-info-services/cronjob-wrapper /var/lock/subsys/osg-info-services 300 /usr/libexec/osg-info-services/run-with-timeout 180:90 /usr/sbin/osg-info-services

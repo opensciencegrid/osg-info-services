@@ -4,7 +4,7 @@ VERSION=1.2.0
 MAIN_SCRIPT=$(NAME)
 CRON_JOB=$(NAME).cron
 INIT_SCRIPT=$(NAME).init
-HELPER_SCRIPT=run-with-timeout
+HELPER_SCRIPTS=run-with-timeout cronjob-wrapper
 
 SBIN_DIR=/usr/sbin
 CRON_DIR=/etc/cron.d
@@ -25,7 +25,7 @@ install:
 	install -m 755 $(INIT_SCRIPT) $(DESTDIR)$(INIT_DIR)/$(NAME)
 
 	mkdir -p $(DESTDIR)$(HELPER_DIR)
-	install -m 755 $(HELPER_SCRIPT) $(DESTDIR)$(HELPER_DIR)/
+	install -m 755 $(HELPER_SCRIPTS) $(DESTDIR)$(HELPER_DIR)/
 
 dist:
 	mkdir -p $(NAME)-$(VERSION)
@@ -34,7 +34,7 @@ dist:
 		$(MAIN_SCRIPT) \
 		$(CRON_JOB) \
 		$(INIT_SCRIPT) \
-		$(HELPER_SCRIPT) \
+		$(HELPER_SCRIPTS) \
 		$(NAME)-$(VERSION)/
 
 	tar czf $(NAME)-$(VERSION).tar.gz \

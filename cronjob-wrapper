@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# A random delay, lockfile and output control wrapper for cron jobs.
+#
+
+if test $# -le 2; then
+    cat 2>&1 <<'END'
+Usage:
+
+    cronjob-wrapper <LOCKFILE> <DELAY> <COMMAND> [ARGS...]
+
+If LOCKFILE is not empty, then only run the command if the specified lock
+file exists.
+
+If DELAY is not zero, then sleep for DELAY seconds before running the
+command.
+
+If the command exit status is nonzero, print its output (stdout and stderr) to
+stderr.
+END
+    exit 2
+fi
+
+LOCKFILE=$1
+DELAY=$2
+shift 2
+
+if test -n "$LOCKFILE"; then
+    test -f "$LOCKFILE" || exit 0
+fi
+
+if test 0 -lt $DELAY; then
+    perl -e "sleep rand $DELAY"
+fi
+
+outfile=`mktemp`
+
+"$@" >$outfile 2>&1
+ret=$?
+
+if test $ret -ne 0; then
+    cat $outfile 1>&2
+fi
+
+rm -f $outfile
+exit $ret
