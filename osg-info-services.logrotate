@@ -1,0 +1,9 @@
+/var/log/osg-info-services.log {
+    daily
+    rotate 5
+    copytruncate
+    compress
+    delaycompress
+    notifempty
+    missingok
+}

@@ -3,33 +3,57 @@
 # A random delay, lockfile and output control wrapper for cron jobs.
 #
 
-if test $# -le 2; then
-    cat 2>&1 <<'END'
+die_with_usage () {
+    cat >&2 <<'END'
 Usage:
 
-    cronjob-wrapper <LOCKFILE> <DELAY> <COMMAND> [ARGS...]
+    cronjob-wrapper [options] <COMMAND> [ARGS...]
 
-If LOCKFILE is not empty, then only run the command if the specified lock
-file exists.
+Options:
 
-If DELAY is not zero, then sleep for DELAY seconds before running the
-command.
+    -d DELAY            Sleep for a random amount of time no more than
+                        DELAY seconds before running the command.
 
-If the command exit status is nonzero, print its output (stdout and stderr) to
-stderr.
+    -l LOCKFILE         If specified, then only run the command if the
+                        given lock file exists.
+
+    -f LOGFILE          If specified, then command output is appended
+                        to LOGFILE instead of printed to stderr.
+
+Command output is only sent to stderr or the log file if the exit
+status is nonzero.
 END
     exit 2
-fi
+}
 
-LOCKFILE=$1
-DELAY=$2
-shift 2
+
+LOCKFILE=
+DELAY=0
+LOGFILE=
+
+TEMP=`getopt d:l:f: "$@"`
+test $? -eq 0 || die_with_usage
+
+eval set -- "$TEMP"
+
+while true; do
+    case $1 in
+        -d) DELAY=$2; shift 2;;
+        -l) LOCKFILE=$2; shift 2;;
+        -f) LOGFILE=$2; shift 2;;
+        --) shift; break;;
+        *) echo "Unknown argument $1"; die_with_usage;;
+    esac
+done
+
+test -n "$1" || die_with_usage
+
 
 if test -n "$LOCKFILE"; then
     test -f "$LOCKFILE" || exit 0
 fi
 
-if test 0 -lt $DELAY; then
+if test 0 -lt "$DELAY"; then
     perl -e "sleep rand $DELAY"
 fi
 
@@ -39,7 +63,16 @@ outfile=`mktemp`
 ret=$?
 
 if test $ret -ne 0; then
-    cat $outfile 1>&2
+    # Some error happened so we want the output
+    if test -n "$LOGFILE"; then
+        if test "X$LOGFILE" != X-; then
+            cat $outfile >> "$LOGFILE"
+        else
+            cat $outfile
+        fi
+    else
+        cat $outfile 1>&2
+    fi
 fi
 
 rm -f $outfile
