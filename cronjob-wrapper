@@ -58,8 +58,8 @@ if test 0 -lt "$DELAY"; then
 fi
 
 outfile=`mktemp`
-
-"$@" >$outfile 2>&1
+echo '========================================' `date` >> $outfile
+"$@" >>$outfile 2>&1
 ret=$?
 
 if test $ret -ne 0; then
