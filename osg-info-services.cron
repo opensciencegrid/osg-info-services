@@ -5,9 +5,9 @@
 
 http_proxy=""
 
-# Run every 10 minutes +/- 5 minutes (300 sec)
-# Send soft kill after 3 minutes (180 sec)
-# Send hard kill 1.5 minutes after that (90 sec)
+# Run every 10 minutes +/- up to 5 minutes (300 sec)
+# Send soft kill after 290 sec (a little under 5 minutes)
+# Send hard kill 10 sec after that
 # Run only if the lock file /var/lock/subsys/osg-info-services exists
 # Log errors into /var/log/osg-info-services.log
 
@@ -15,4 +15,4 @@ PATH=/usr/libexec/osg-info-services:/usr/sbin:/sbin:/usr/bin:/bin
 INFOSERVICES_LOCK=/var/lock/subsys/osg-info-services
 INFOSERVICES_LOG=/var/log/osg-info-services.log
 
-*/10 * * * * root cronjob-wrapper -l "$INFOSERVICES_LOCK" -d 300 -f "$INFOSERVICES_LOG" run-with-timeout 180:90 osg-info-services || echo "osg-info-services cronjob exited with code $?; check $INFOSERVICES_LOG for details"
+*/10 * * * * root cronjob-wrapper -l "$INFOSERVICES_LOCK" -d 300 -f "$INFOSERVICES_LOG" run-with-timeout 290:10 osg-info-services || echo "osg-info-services cronjob exited with code $?; check $INFOSERVICES_LOG for details"

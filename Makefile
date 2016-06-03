@@ -1,5 +1,5 @@
 NAME=osg-info-services
-VERSION=1.2.1
+VERSION=1.2.2
 
 MAIN_SCRIPT=$(NAME)
 CRON_JOB=$(NAME).cron
